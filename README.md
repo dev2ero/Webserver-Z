@@ -1,2 +1,2 @@
 # Webserver-Z
-A crafting web server
+An ignorable web server
