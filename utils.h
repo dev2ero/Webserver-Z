@@ -9,5 +9,6 @@
 std::ostream& logmsg(int flag);
 
 void handle_SIGPIPE();
+int bind_listen_socket(int port);
 
 #endif

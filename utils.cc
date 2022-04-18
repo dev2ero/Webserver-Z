@@ -2,7 +2,10 @@
 #include <cstring>
 #include <unistd.h>
 #include <signal.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <sys/syscall.h>
+#include <sys/socket.h>
 
 #include "utils.h"
 
@@ -28,4 +31,23 @@ void handle_SIGPIPE() {
     sa.sa_flags = 0;
     if(sigaction(SIGPIPE, &sa, NULL) == -1)
 	LOG(ERRO) << "Ignore SIGPIPE failed! " << strerror(errno) << std::endl;
+}
+
+int bind_listen_socket(int port) {
+    int listen_fd = 0;
+    if((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+        return -1;
+    sockaddr_in server_addr;
+    memset(&server_addr, '\0', sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons((unsigned short)port);
+    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    int opt = 1;
+    if(setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+        return -1;
+    if(bind(listen_fd, (sockaddr*)&server_addr, sizeof(server_addr)) == -1)
+        return -1;
+    if(listen(listen_fd, 1024) == -1)
+        return -1;
+    return listen_fd;
 }
