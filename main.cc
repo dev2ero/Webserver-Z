@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -19,11 +20,13 @@ int main(int argc, char *argv[]) {
     handle_SIGPIPE();
 
     int listen_fd = -1;
-    if((listen_fd == bind_listen_socket(port)) == -1) {
+    if((listen_fd = bind_listen_socket(port)) == -1) {
         LOG(ERRO)  << "Bind " << port << " port failed: "
                    << strerror(errno) << endl;
         exit(EXIT_FAILURE);
     }
+
+    ThreadPool thread_pool(16);
 
     for(;;) {
 	
