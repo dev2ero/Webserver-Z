@@ -1,7 +1,7 @@
-#include <iostream>
 #include <cstring>
 #include <unistd.h>
 #include <signal.h>
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <sys/syscall.h>
@@ -50,4 +50,21 @@ int bind_listen_socket(int port) {
     if(listen(listen_fd, 1024) == -1)
         return -1;
     return listen_fd;
+}
+
+bool set_socket_no_block(int fd) {
+    int flag = fcntl(fd, F_GETFD);
+    if(flag == -1)
+        return -1;
+    flag |= O_NONBLOCK;
+    if(fcntl(fd, F_SETFL, flag) == -1)
+        return false;
+    return true;
+}
+
+bool set_socket_no_delay(int fd) {
+    int enable = 1;
+    if(setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (void*)&enable, sizeof(enable)) == -1)
+        return false;
+    return true;
 }
